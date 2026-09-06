@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Export SMS Stats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{nav :: navbar}"></div>
+
+<div class="container my-4" style="max-width: 480px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white fw-bold py-3">Export SMS Stats (CSV)</div>
+        <div class="card-body">
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <form th:action="@{/dashboard/sms-stats/export}" method="get">
+
+                <div th:if="${isAdmin}" class="mb-3">
+                    <label class="form-label fw-semibold">Company</label>
+                    <select name="targetCompanyId" class="form-select" required>
+                        <option value="" disabled selected>Select a company</option>
+                        <option th:each="c : ${companies}"
+                                th:value="${c.companyId}"
+                                th:text="${c.companyName}">Company Name</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">From</label>
+                    <input type="date" name="from" class="form-control" th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">To</label>
+                    <input type="date" name="to" class="form-control" th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/dashboard}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Export</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

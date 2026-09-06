@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Select Target Company</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div th:replace="~{nav :: navbar}"></div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Admin Action Required</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted text-center">
+                        Please select a company first
+                    </p>
+
+                    <form th:action="${redirectUrl != null ? redirectUrl : '/contacts'}" method="get">
+                        <div class="mb-3">
+                            <label for="companySelect" class="form-label">Select Company</label>
+                            <select class="form-select" id="companySelect" name="targetCompanyId" required>
+                                <option value="" disabled selected>Choose a company...</option>
+                                <option th:each="company : ${companies}"
+                                        th:value="${company.companyId}"
+                                        th:text="${company.companyName}"></option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Continue</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

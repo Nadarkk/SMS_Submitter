@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Send Message</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div th:replace="~{nav :: navbar}"></div>
+
+<!-- Page content wrapper -->
+<div class="container my-4">
+
+    <h2>Messages</h2>
+    <hr />
+
+    <!-- Template Auto-Fill Dropdown -->
+    <div class="mb-3" th:if="${not #lists.isEmpty(templates)}">
+        <label class="form-label fw-bold">Use Template (Optional)</label>
+        <form th:action="@{/messages/send}" method="get">
+            <input type="hidden" name="targetCompanyId" th:value="${targetCompanyId}" />
+            <select name="selectedTemplateId" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Select Template --</option>
+                <option th:each="t : ${templates}"
+                        th:value="${t.templateId}"
+                        th:text="${t.name}"
+                        th:selected="${t.templateId == messageReqDto.templateId}">
+                </option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Main Message Form -->
+    <form th:action="@{/messages/send}" th:object="${messageReqDto}" method="post" class="w-50">
+
+        <input type="hidden" name="targetCompanyId" th:value="${targetCompanyId}" />
+        <input type="hidden" th:field="*{templateId}" />
+
+        <!-- Sender Name -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">Sender Name</label>
+            <input type="text"
+                   th:field="*{sender}"
+                   class="form-control"
+                   placeholder="Enter sender name"
+                   th:classappend="${#fields.hasErrors('sender')} ? 'is-invalid'" />
+            <div class="invalid-feedback" th:errors="*{sender}"></div>
+        </div>
+
+        <!-- Select Contacts Header with "Select All" Option -->
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-bold m-0">Select Contacts</label>
+                <div class="form-check" th:if="${not #lists.isEmpty(contacts)}">
+                    <input class="form-check-input" type="checkbox" id="selectAllContacts" onclick="toggleSelectAll(this)">
+                    <label class="form-check-label fw-bold" for="selectAllContacts">Select All</label>
+                </div>
+            </div>
+
+            <div class="border rounded p-2" style="max-height: 220px; overflow-y: auto;"
+                 th:classappend="${#fields.hasErrors('contactIds')} ? 'is-invalid'">
+                <div class="form-check" th:each="c : ${contacts}">
+                    <input type="checkbox"
+                           class="form-check-input contact-checkbox"
+                           th:field="*{contactIds}"
+                           th:value="${c.contactId}" />
+                    <label class="form-check-label" th:for="${#ids.prev('contactIds')}"
+                           th:text="${c.name + ' (' + c.phoneNo + ')'}"></label>
+                </div>
+                <div th:if="${#lists.isEmpty(contacts)}" class="text-muted small">No contacts available.</div>
+            </div>
+            <div class="invalid-feedback" th:errors="*{contactIds}"></div>
+        </div>
+
+        <!-- Message Body -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">Message Content</label>
+            <textarea th:field="*{body}" class="form-control" rows="4"
+                      placeholder="Type message text here..."
+                      th:classappend="${#fields.hasErrors('body')} ? 'is-invalid'"></textarea>
+            <div class="invalid-feedback" th:errors="*{body}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Send Message</button>
+        <a th:href="@{/messages(targetCompanyId=${targetCompanyId})}" class="btn btn-secondary">Cancel</a>
+    </form>
+
+</div>
+
+<script>
+    function toggleSelectAll(selectAllCheckbox) {
+        const checkboxes = document.querySelectorAll('.contact-checkbox');
+        checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

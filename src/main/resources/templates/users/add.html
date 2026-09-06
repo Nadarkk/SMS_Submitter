@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create User</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div th:replace="~{nav :: navbar}"></div>
+<div class="container my-4">
+
+<h2 class="mt-4">Create New User</h2>
+<hr />
+
+<form th:action="@{/users/add}" th:object="${userReqDto}" method="post" class="w-50">
+
+    <div class="mb-3">
+        <label class="form-label">First Name</label>
+        <input type="text" th:field="*{firstName}" class="form-control" th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'">
+        <div class="invalid-feedback" th:errors="*{firstName}"></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Last Name</label>
+        <input type="text" th:field="*{lastName}" class="form-control" th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'">
+        <div class="invalid-feedback" th:errors="*{lastName}"></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Phone Number</label>
+        <input type="text" th:field="*{phoneNo}" class="form-control" th:classappend="${#fields.hasErrors('phoneNo')} ? 'is-invalid'">
+        <div class="invalid-feedback" th:errors="*{phoneNo}"></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" th:field="*{password}" class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'">
+        <small class="text-muted">Must contain 8-50 chars, 1 uppercase, 1 lowercase, 1 digit, and 1 special char.</small>
+        <div class="invalid-feedback" th:errors="*{password}"></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Role</label>
+        <select th:field="*{role}" class="form-select" th:classappend="${#fields.hasErrors('role')} ? 'is-invalid'">
+            <option value="">-- Select Role --</option>
+            <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+        </select>
+        <div class="invalid-feedback" th:errors="*{role}"></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Company</label>
+        <select th:field="*{companyId}" class="form-select" th:classappend="${#fields.hasErrors('companyId')} ? 'is-invalid'">
+            <option value="">-- Select Company --</option>
+            <!-- FIXED: Changed c.id to c.companyId to match CompanyResDto property -->
+            <option th:each="c : ${companies}" th:value="${c.companyId}" th:text="${c.companyName}"></option>
+        </select>
+        <div class="invalid-feedback" th:errors="*{companyId}"></div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save User</button>
+    <a th:href="@{/users}" class="btn btn-secondary">Cancel</a>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>x`
+</body>
+</html>

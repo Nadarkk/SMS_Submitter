@@ -1,0 +1,209 @@
+    <!DOCTYPE html>
+    <html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Dashboard - SMS Submitter</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body class="bg-light">
+
+    <div th:replace="~{nav :: navbar}"></div>
+
+    <div class="container my-4">
+        <!-- Header Greeting & Admin Company Switcher -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2>Welcome back, <span th:text="${fullName}">User</span>!</h2>
+                <p class="text-muted mb-0">Here is your SMS delivery overview and real-time statistics.</p>
+            </div>
+            <a th:href="@{/dashboard/sms-stats/export}" class="btn btn-outline-primary"
+               th:if="${#authorization.expression('hasRole(''ADMIN'') or hasRole(''MANAGER'')')}">
+                Export CSV
+            </a>
+
+            <!-- Admin Dropdown Switcher -->
+            <div th:if="${isAdmin}">
+                <form th:action="@{/dashboard}" method="get" class="d-flex align-items-center gap-2">
+                    <label class="fw-semibold text-nowrap small text-muted mb-0">Viewing Company:</label>
+                    <select name="targetCompanyId" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="" th:selected="${targetCompanyId == null}">All Companies (Global)</option>
+                        <option th:each="c : ${companies}"
+                                th:value="${c.companyId}"
+                                th:text="${c.companyName}"
+                                th:selected="${c.companyId == targetCompanyId}">Company Name</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- KPI Metric Cards Row -->
+        <!-- KPI Metric Cards Row (6 Cards) -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-white bg-primary h-100">
+                    <div class="card-body p-3">
+                        <h6 class="card-title text-uppercase fw-semibold" style="font-size: 0.75rem;">Total Messages</h6>
+                        <h3 class="card-text fw-bold mb-0" th:text="${stats.totalMessages}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-white bg-dark h-100">
+                    <div class="card-body p-3">
+                        <h6 class="card-title text-uppercase fw-semibold" style="font-size: 0.75rem;">Total Recipients</h6>
+                        <h3 class="card-text fw-bold mb-0" th:text="${stats.totalSms}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-white bg-secondary h-100">
+                    <div class="card-body p-3">
+                        <h6 class="card-title text-uppercase fw-semibold" style="font-size: 0.75rem;">Total Contacts</h6>
+                        <h3 class="card-text fw-bold mb-0" th:text="${stats.totalContacts}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-white bg-secondary h-100">
+                    <div class="card-body p-3">
+                        <h6 class="card-title text-uppercase fw-semibold" style="font-size: 0.75rem;">Templates</h6>
+                        <h3 class="card-text fw-bold mb-0" th:text="${stats.totalTemplates}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-white bg-success h-100">
+                    <div class="card-body p-3">
+                        <h6 class="card-title text-uppercase fw-semibold" style="font-size: 0.75rem;">Delivery Rate</h6>
+                        <h3 class="card-text fw-bold mb-0" th:text="${stats.deliveryRate} + '%'">0%</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card border-0 shadow-sm text-white bg-danger h-100">
+                    <div class="card-body p-3">
+                        <h6 class="card-title text-uppercase fw-semibold" style="font-size: 0.75rem;">Failed SMS</h6>
+                        <h3 class="card-text fw-bold mb-0" th:text="${stats.totalFailed}">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Charts Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white fw-bold py-3">SMS Delivery Success vs. Failure</div>
+                    <div class="card-body" style="position: relative; height: 260px;">
+                        <canvas id="statusBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white fw-bold py-3">Quick Actions</div>
+                    <div class="card-body d-flex flex-column justify-content-center gap-3">
+                        <a th:href="@{/messages/send(targetCompanyId=${targetCompanyId})}" class="btn btn-primary btn-lg w-100">
+                            Send New Message
+                        </a>
+                        <a th:href="@{/template}" class="btn btn-outline-secondary w-100">
+                            Manage Templates
+                        </a>
+                        <a th:href="@{/contacts}" class="btn btn-outline-secondary w-100">
+                            Manage Contacts
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Messages Table -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+                <span>Recent Messages</span>
+                <a th:href="@{/messages(targetCompanyId=${targetCompanyId})}" class="btn btn-sm btn-primary">View All Messages</a>
+            </div>
+            <div class="card-body p-0">
+                <div th:if="${#lists.isEmpty(stats.recentMessages)}" class="p-3 text-muted">No recent messages sent yet.</div>
+
+                <div class="table-responsive" th:unless="${#lists.isEmpty(stats.recentMessages)}">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Sender</th>
+                            <th>Body</th>
+                            <th>Segments</th>
+                            <th>Recipients</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="m : ${stats.recentMessages}">
+                            <td th:text="${#temporals.format(m.sendDate, 'dd MMM yyyy HH:mm')}">Date</td>
+                            <td th:text="${m.sender}">Sender</td>
+                            <td style="max-width: 300px; word-wrap: break-word; white-space: normal;">
+                                <span th:text="${#strings.abbreviate(m.body, 80)}">Body</span>
+                            </td>
+                            <td th:text="${m.segmentCount}">1</td>
+                            <td>
+                                <span class="badge bg-secondary"
+                                      th:text="${m.recipients != null ? m.recipients.size() : 0} + ' Recipients'">
+                                    0 Recipients
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/messages/{id}(id=${m.messageId}, targetCompanyId=${targetCompanyId})}"
+                                   class="btn btn-sm btn-info text-white">View Details</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Chart.js Script Setup -->
+    <script th:inline="javascript">
+        const chartData = {
+            delivered: /*[[${stats.chartDeliveredCount}]]*/ 0,
+            failed: /*[[${stats.chartFailedCount}]]*/ 0
+        };
+
+        // Only include final states
+        const labels = ['Delivered', 'Failed'];
+        const colors = ['#198754', '#dc3545'];
+
+        new Chart(document.getElementById('statusBarChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Count',
+                    data: [chartData.delivered, chartData.failed],
+                    backgroundColor: colors,
+                    barThickness: 60 // Controls bar width for better proportions
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>

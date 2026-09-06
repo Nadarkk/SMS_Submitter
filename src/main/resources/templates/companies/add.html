@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Company</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div th:replace="~{nav :: navbar}"></div>
+<div class="container my-4">
+
+<h2 class="mt-4">Create New Company</h2>
+<hr />
+
+<form th:action="@{/companies/add}" th:object="${companyReqDto}" method="post" class="w-50">
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Company Name</label>
+        <input type="text"
+               th:field="*{companyName}"
+               class="form-control"
+               placeholder="Enter company name"
+               th:classappend="${#fields.hasErrors('companyName')} ? 'is-invalid'" />
+        <div class="invalid-feedback" th:errors="*{companyName}"></div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Company</button>
+    <a th:href="@{/companies}" class="btn btn-secondary">Cancel</a>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+</body>
+</html>

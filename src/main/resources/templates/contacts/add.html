@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Add Contact</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{nav :: navbar}"></div>
+<div class="container" style="max-width: 500px;">
+    <h1 class="mb-4">Add Contact</h1>
+    <form th:action="@{/contacts(targetCompanyId=${targetCompanyId})}" th:object="${contact}" method="post">
+
+        <input type="hidden" name="targetCompanyId" th:value="${targetCompanyId}" />
+
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert">
+            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" class="mb-0"></p>
+        </div>
+
+        <!-- Name Field -->
+        <div class="mb-3">
+            <label for="name" class="form-label">Contact Name</label>
+            <input type="text" th:field="*{name}" class="form-control" id="name"
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+
+        <!-- Phone Field -->
+        <div class="mb-3">
+            <label for="phoneNo" class="form-label">Phone Number</label>
+            <input type="text" th:field="*{phoneNo}" class="form-control" id="phoneNo"
+                   th:classappend="${#fields.hasErrors('phoneNo')} ? 'is-invalid' : ''">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('phoneNo')}" th:errors="*{phoneNo}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Save Contact</button>
+    </form>
+</div>
+</body>
+</html>

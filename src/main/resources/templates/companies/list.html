@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Company Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div th:replace="~{nav :: navbar}" ></div>
+<div class="container my-4">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Company Management</h2>
+    <a th:href="@{/companies/add}" class="btn btn-primary text-nowrap">+ Add New Company</a>
+</div>
+
+<!-- Alert for Success Message -->
+<div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<!-- Companies Table -->
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+    <tr>
+        <th>#</th>
+        <th>Company ID</th>
+        <th>Company Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="company, iterStat : ${companies}">
+        <td th:text="${iterStat.count}">1</td>
+        <td th:text="${company.companyId}">1</td>
+        <td th:text="${company.companyName}">Acme Corp</td>
+    </tr>
+
+    <!-- Empty State Message -->
+    <tr th:if="${#lists.isEmpty(companies)}">
+        <td colspan="3" class="text-center text-muted py-3">No companies found.</td>
+    </tr>
+    </tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+</body>
+</html>

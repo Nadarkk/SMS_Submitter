@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Templates</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{nav :: navbar}"></div>
+<div class="container my-4">
+    <!-- Hide "Create Template" button from standard USERs -->
+    <div class="d-flex justify-content-end mb-3"
+         th:if="${#authorization.expression('hasRole(''ADMIN'') or hasRole(''MANAGER'')')}">
+        <a th:href="@{template/add(targetCompanyId=${targetCompanyId})}" class="btn btn-primary">
+            Create Template
+        </a>
+    </div>
+
+    <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Body</th>
+            <!-- Hide Actions header from standard USERs -->
+            <th th:if="${#authorization.expression('hasRole(''ADMIN'') or hasRole(''MANAGER'')')}">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <th:block th:each="t : ${templates}">
+
+            <!-- Read-only Row -->
+            <tr th:if="${editId == null or editId != t.templateId}">
+                <td th:text="${t.name}"></td>
+                <td th:text="${t.body}"></td>
+
+                <!-- Hide Edit and Delete buttons from standard USERs -->
+                <td th:if="${#authorization.expression('hasRole(''ADMIN'') or hasRole(''MANAGER'')')}">
+                    <div class="d-flex gap-1">
+                        <a class="btn btn-sm btn-secondary"
+                           th:href="@{/template(editId=${t.templateId}, targetCompanyId=${targetCompanyId})}">Edit</a>
+                        <form th:action="@{/template/delete/{id}(id=${t.templateId})}" method="post" class="d-inline">
+                            <input type="hidden" name="targetCompanyId" th:value="${targetCompanyId}"/>
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Delete this template?');">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- Inline Edit Row (Only visible if editId matches) -->
+            <tr th:if="${editId != null and editId == t.templateId}">
+                <td colspan="3">
+                    <form th:action="@{/template/edit/{id}(id=${t.templateId})}" method="post" th:object="${editTemplateDto}">
+                        <input type="hidden" name="targetCompanyId" th:value="${targetCompanyId}"/>
+
+                        <div class="row g-2 align-items-center">
+                            <!-- Name Column -->
+                            <div class="col-md-3">
+                                <input type="text" class="form-control form-control-sm" th:field="*{name}" placeholder="Name"/>
+                                <span class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                            </div>
+
+                            <!-- Body Column -->
+                            <div class="col-md-6">
+                                <textarea class="form-control form-control-sm" rows="1" th:field="*{body}" placeholder="Body"></textarea>
+                                <span class="text-danger small" th:if="${#fields.hasErrors('body')}" th:errors="*{body}"></span>
+                            </div>
+
+                            <!-- Actions Column -->
+                            <div class="col-md-3 d-flex gap-1">
+                                <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   th:href="@{/template(targetCompanyId=${targetCompanyId})}">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+
+        </th:block>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
